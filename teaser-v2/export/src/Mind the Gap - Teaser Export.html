@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mind the Gap — Teaser (Export)</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #000; overflow: hidden;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  #root { position: fixed; inset: 0; }
+
+  /* Hide the Stage's playback bar and canvas drop shadow in clean mode */
+  body.clean #root > div > div > div[style*="box-shadow"] {
+    box-shadow: none !important;
+  }
+  /* PlaybackBar is the sibling below the canvas flex area — it has fixed height and padding */
+  body.clean #root > div > :last-child {
+    display: none !important;
+  }
+  /* Make the canvas area fill the full viewport (no bottom bar) */
+  body.clean #root > div {
+    background: #000 !important;
+  }
+
+  /* Export overlay UI */
+  #xui {
+    position: fixed; top: 20px; left: 20px; z-index: 10000;
+    background: rgba(10,10,10,0.92); color: #fff;
+    border: 1px solid #ff0000; padding: 16px 18px;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11px; font-weight: 900; letter-spacing: 0.22em;
+    text-transform: uppercase; max-width: 320px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  #xui.hidden { display: none; }
+  #xui h3 { margin: 0 0 6px 0; font-size: 18px; letter-spacing: -0.02em; text-transform: uppercase; }
+  #xui p { margin: 6px 0; font-weight: 400; letter-spacing: 0.06em; opacity: 0.85; line-height: 1.45; }
+  #xui ol { margin: 6px 0 10px 18px; padding: 0; font-weight: 400; letter-spacing: 0.06em; opacity: 0.85; }
+  #xui li { margin: 3px 0; line-height: 1.45; }
+  #xui button {
+    background: #ff0000; color: #fff; border: none; padding: 10px 16px;
+    font: inherit; font-weight: 900; letter-spacing: 0.22em; cursor: pointer; margin-top: 4px;
+    width: 100%;
+  }
+  #xui button:hover { background: #fff; color: #000; }
+  #xui .sub { font-size: 10px; opacity: 0.5; margin-top: 6px; letter-spacing: 0.3em; }
+
+  /* Countdown overlay */
+  #countdown {
+    position: fixed; inset: 0; background: #000; color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    pointer-events: none;
+  }
+  #countdown.hidden { display: none; }
+  #countdown .num { font-size: 280px; font-weight: 900; letter-spacing: -0.05em; line-height: 0.9; }
+  #countdown .kicker { font-size: 14px; font-weight: 900; letter-spacing: 0.4em; text-transform: uppercase; opacity: 0.7; margin-top: 20px; }
+
+  /* "Hold" overlay after playback ends */
+  #endhold { display: none; }
+  body.ended #endhold {
+    display: flex;
+    position: fixed; bottom: 40px; right: 40px; z-index: 9998;
+    background: rgba(0,0,0,0.7); color: #fff;
+    padding: 10px 14px; font-size: 10px; font-weight: 900; letter-spacing: 0.3em;
+    text-transform: uppercase; pointer-events: none;
+  }
+
+  /* Press-space indicator */
+  body.clean #xui.collapsed {
+    width: auto; padding: 8px 12px; font-size: 10px;
+  }
+  body.clean #xui.collapsed > *:not(.mini) { display: none; }
+  #xui .mini { display: none; }
+  body.clean #xui.collapsed .mini { display: block; }
+</style>
+<meta name="ext-resource-dependency" content="assets/anthropic-radar.png" data-resource-id="radar">
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="#ffffff"/>
+    <rect x="40" y="40" width="320" height="4" fill="#000000"/>
+    <text x="40" y="120" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="56" fill="#000000" letter-spacing="-2">MIND</text>
+    <text x="40" y="175" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="56" fill="#000000" letter-spacing="-2">THE</text>
+    <text x="40" y="230" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="56" fill="#ff0000" letter-spacing="-2">GAP.</text>
+    <rect x="40" y="256" width="320" height="4" fill="#000000"/>
+  </svg>
+</template>
+<div id="root"></div>
+
+<!-- Export control panel -->
+<div id="xui">
+  <h3>Clean Export</h3>
+  <div class="sub">45s · 1920 × 1080</div>
+  <p>A chrome-free player for screen recording.</p>
+  <ol>
+    <li>Start your recorder (QuickTime / Loom / Game Bar)</li>
+    <li>Click <b>Start</b> — you get a 3-second countdown</li>
+    <li>Recording area: the white canvas</li>
+    <li>Video auto-ends and holds on last frame</li>
+  </ol>
+  <button id="xui-start">Start with countdown</button>
+  <div class="sub" style="margin-top:10px">Keys · <b>R</b> restart · <b>H</b> hide panel · <b>Space</b> toggle</div>
+  <div class="mini">● Recording-ready · <b>H</b> panel</div>
+</div>
+
+<!-- Countdown overlay -->
+<div id="countdown" class="hidden">
+  <div class="num" id="cd-num">3</div>
+  <div class="kicker">Recording in…</div>
+</div>
+
+<!-- Post-end hint -->
+<div id="endhold">● Playback complete · R to replay</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  // Fixed tweakables (no live edit in export mode — bake the defaults)
+  window.__TWEAKS = {
+    accent: '#FF0000',
+    spotRole: 'priv',
+    pace: 1,
+    loop: false,
+  };
+
+  // Always start at t=0 for a clean take
+  try { localStorage.removeItem('mtg-export:t'); } catch {}
+</script>
+
+<script type="text/babel" src="animations.jsx"></script>
+<script type="text/babel" src="scenes.jsx"></script>
+<script type="text/babel">
+  const { useState, useEffect, useRef } = React;
+  const PERSIST_KEY = 'mtg-export';
+  const TEASER_TOTAL = 45;
+
+  const TT = {
+    title:     [0,  4],
+    seven:     [4,  5],
+    radar:     [9,  7],
+    notone:    [16, 5],
+    spotlight: [21, 11],
+    takeaway:  [32, 6],
+    cta:       [38, 7],
+  };
+
+  const TeaserVideo = ({ spotRoleId }) => {
+    const spotRole = window.ROLES.find(r => r.id === spotRoleId) || window.ROLES.find(r => r.id === 'priv');
+    const note = window.SPOT_NOTES[spotRole.id] || '';
+    return (
+      <>
+        <Sprite start={TT.title[0]}     end={TT.title[0] + TT.title[1]}><window.TitleScene /></Sprite>
+        <Sprite start={TT.seven[0]}     end={TT.seven[0] + TT.seven[1]}><window.SevenScene /></Sprite>
+        <Sprite start={TT.radar[0]}     end={TT.radar[0] + TT.radar[1]}><window.RadarScene /></Sprite>
+        <Sprite start={TT.notone[0]}    end={TT.notone[0] + TT.notone[1]}><window.NotOneJobScene /></Sprite>
+        <window.RoleSpotlight role={spotRole} note={note}
+          spotStart={TT.spotlight[0]} spotDur={TT.spotlight[1]} idx={1} total={1} />
+        <Sprite start={TT.takeaway[0]}  end={TT.takeaway[0] + TT.takeaway[1]}><window.TakeawayScene /></Sprite>
+        <Sprite start={TT.cta[0]}       end={TT.cta[0] + TT.cta[1]}><window.CTAScene /></Sprite>
+      </>
+    );
+  };
+
+  // Intercepts Stage's timeline to detect end-of-playback → add body.ended class
+  const EndWatcher = ({ children }) => {
+    const ctx = window.useTimeline();
+    useEffect(() => {
+      if (ctx.time >= TEASER_TOTAL - 0.05) {
+        document.body.classList.add('ended');
+      } else if (ctx.time < 0.5) {
+        document.body.classList.remove('ended');
+      }
+    }, [ctx.time]);
+    return children;
+  };
+
+  const App = () => {
+    const [running, setRunning] = useState(false);
+    const [stageKey, setStageKey] = useState(0);
+
+    // Expose restart control
+    useEffect(() => {
+      window.__restart = () => {
+        try { localStorage.removeItem(PERSIST_KEY + ':t'); } catch {}
+        document.body.classList.remove('ended');
+        setStageKey(k => k + 1);
+        setRunning(true);
+      };
+    }, []);
+
+    return (
+      <Stage
+        key={stageKey}
+        width={1920}
+        height={1080}
+        duration={TEASER_TOTAL}
+        background="#FFFFFF"
+        loop={false}
+        autoplay={running}
+        persistKey={PERSIST_KEY}
+      >
+        <EndWatcher>
+          <TeaserVideo spotRoleId={window.__TWEAKS.spotRole} />
+        </EndWatcher>
+      </Stage>
+    );
+  };
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<script>
+  // UI wiring — countdown + clean-mode toggle + keyboard shortcuts
+  const xui = document.getElementById('xui');
+  const cd = document.getElementById('countdown');
+  const cdNum = document.getElementById('cd-num');
+  const startBtn = document.getElementById('xui-start');
+
+  const enterClean = () => {
+    document.body.classList.add('clean');
+    xui.classList.add('collapsed');
+  };
+  const exitClean = () => {
+    document.body.classList.remove('clean');
+    xui.classList.remove('collapsed');
+    xui.classList.remove('hidden');
+  };
+
+  // Start sequence: enter clean → countdown 3/2/1 → restart video
+  const startRun = () => {
+    enterClean();
+    xui.classList.add('hidden');
+    cd.classList.remove('hidden');
+    let n = 3;
+    cdNum.textContent = n;
+    const tick = () => {
+      n--;
+      if (n > 0) {
+        cdNum.textContent = n;
+        setTimeout(tick, 700);
+      } else {
+        cd.classList.add('hidden');
+        // reveal mini indicator (but keep panel hidden for first moment of recording)
+        setTimeout(() => xui.classList.remove('hidden'), 100);
+        if (window.__restart) window.__restart();
+      }
+    };
+    setTimeout(tick, 700);
+  };
+
+  startBtn.addEventListener('click', startRun);
+
+  // Keyboard: R restart, H toggle panel, Space also triggers start
+  window.addEventListener('keydown', (e) => {
+    // Ignore if typing in input
+    if (e.target.matches('input,textarea')) return;
+    if (e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      startRun();
+    } else if (e.key === 'h' || e.key === 'H') {
+      e.preventDefault();
+      xui.classList.toggle('hidden');
+    } else if (e.code === 'Space') {
+      e.preventDefault();
+      if (!document.body.classList.contains('clean')) startRun();
+      else xui.classList.toggle('hidden');
+    }
+  });
+</script>
+</body>
+</html>

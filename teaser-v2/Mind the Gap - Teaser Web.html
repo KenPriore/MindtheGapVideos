@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mind the Gap — Teaser</title>
+<meta name="description" content="Mind the Gap: AI capability vs. legal adoption. A 45-second animated intro.">
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #000; overflow: hidden;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  #root { position: fixed; inset: 0; }
+
+  /* Hide Stage's built-in playback bar and drop shadow so it's a pure video */
+  #root > div > div > div[style*="box-shadow"] { box-shadow: none !important; }
+  #root > div > :last-child { display: none !important; }
+  #root > div { background: #000 !important; }
+
+  /* Tiny "replay" affordance after playback ends */
+  #replay {
+    position: fixed; bottom: 24px; right: 24px; z-index: 10;
+    background: rgba(0,0,0,0.75); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 10px 14px; font-size: 11px; font-weight: 900;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    cursor: pointer; opacity: 0; pointer-events: none;
+    transition: opacity 300ms ease;
+    font-family: inherit;
+  }
+  #replay:hover { background: #fff; color: #000; }
+  body.ended #replay { opacity: 1; pointer-events: auto; }
+
+  /* No-JS / loading fallback */
+  #fallback {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: #fff; color: #000; z-index: 0;
+  }
+  #fallback .m { font-size: 120px; font-weight: 900; letter-spacing: -0.04em; line-height: 0.9; text-transform: uppercase; }
+  #fallback .g { color: #ff0000; }
+  #root:not(:empty) ~ #fallback { display: none; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+<div id="fallback">
+  <div class="m">Mind<br/>The<br/><span class="g">Gap.</span></div>
+</div>
+<button id="replay" type="button" aria-label="Replay video">↻ Replay</button>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  // Baked-in tweakables — no live editing in web mode
+  window.__TWEAKS = { accent: '#FF0000', spotRole: 'priv', pace: 1, loop: false };
+  // Always start at t=0 on page load
+  try { localStorage.removeItem('mtg-web:t'); } catch {}
+</script>
+
+<script type="text/babel" src="animations.jsx"></script>
+<script type="text/babel" src="scenes.jsx"></script>
+<script type="text/babel">
+  const { useState, useEffect } = React;
+  const PERSIST_KEY = 'mtg-web';
+  const TEASER_TOTAL = 45;
+
+  const TT = {
+    title:     [0,  4],
+    seven:     [4,  5],
+    radar:     [9,  7],
+    notone:    [16, 5],
+    spotlight: [21, 11],
+    takeaway:  [32, 6],
+    cta:       [38, 7],
+  };
+
+  const TeaserVideo = ({ spotRoleId }) => {
+    const spotRole = window.ROLES.find(r => r.id === spotRoleId) || window.ROLES.find(r => r.id === 'priv');
+    const note = window.SPOT_NOTES[spotRole.id] || '';
+    return (
+      <>
+        <Sprite start={TT.title[0]}     end={TT.title[0] + TT.title[1]}><window.TitleScene /></Sprite>
+        <Sprite start={TT.seven[0]}     end={TT.seven[0] + TT.seven[1]}><window.SevenScene /></Sprite>
+        <Sprite start={TT.radar[0]}     end={TT.radar[0] + TT.radar[1]}><window.RadarScene /></Sprite>
+        <Sprite start={TT.notone[0]}    end={TT.notone[0] + TT.notone[1]}><window.NotOneJobScene /></Sprite>
+        <window.RoleSpotlight role={spotRole} note={note}
+          spotStart={TT.spotlight[0]} spotDur={TT.spotlight[1]} idx={1} total={1} />
+        <Sprite start={TT.takeaway[0]}  end={TT.takeaway[0] + TT.takeaway[1]}><window.TakeawayScene /></Sprite>
+        <Sprite start={TT.cta[0]}       end={TT.cta[0] + TT.cta[1]}><window.CTAScene /></Sprite>
+      </>
+    );
+  };
+
+  const EndWatcher = ({ children }) => {
+    const ctx = window.useTimeline();
+    useEffect(() => {
+      if (ctx.time >= TEASER_TOTAL - 0.05) document.body.classList.add('ended');
+      else if (ctx.time < 0.5) document.body.classList.remove('ended');
+    }, [ctx.time]);
+    return children;
+  };
+
+  const App = () => {
+    const [stageKey, setStageKey] = useState(0);
+    useEffect(() => {
+      window.__restart = () => {
+        try { localStorage.removeItem(PERSIST_KEY + ':t'); } catch {}
+        document.body.classList.remove('ended');
+        setStageKey(k => k + 1);
+      };
+    }, []);
+    return (
+      <Stage
+        key={stageKey}
+        width={1920}
+        height={1080}
+        duration={TEASER_TOTAL}
+        background="#FFFFFF"
+        loop={false}
+        autoplay={true}
+        persistKey={PERSIST_KEY}
+      >
+        <EndWatcher>
+          <TeaserVideo spotRoleId={window.__TWEAKS.spotRole} />
+        </EndWatcher>
+      </Stage>
+    );
+  };
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+<script>
+  // Replay button + keyboard
+  const replay = document.getElementById('replay');
+  replay.addEventListener('click', () => window.__restart && window.__restart());
+  window.addEventListener('keydown', (e) => {
+    if (e.target.matches('input,textarea')) return;
+    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); window.__restart && window.__restart(); }
+  });
+</script>
+</body>
+</html>

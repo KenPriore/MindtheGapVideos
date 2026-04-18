@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Mind the Gap — 45s Teaser (Print)</title>
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #222; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page {
+    position: relative;
+    width: 1920px; height: 1080px;
+    overflow: hidden;
+    background: #fff;
+    page-break-after: always;
+    break-after: page;
+    margin: 0 auto 16px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.2);
+  }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  window.__TWEAKS = { accent: '#FF0000', spotRole: 'priv', pace: 1, loop: false };
+</script>
+
+<script type="text/babel" src="animations.jsx"></script>
+<script type="text/babel" src="scenes.jsx"></script>
+
+<script type="text/babel">
+  // Static frames of each scene, captured at their peak (~80% through).
+  // We fake a TimelineContext with a fixed time so scene animations settle.
+  const TT = {
+    title:     [0,  4],
+    seven:     [4,  5],
+    radar:     [9,  7],
+    notone:    [16, 5],
+    spotlight: [21, 11],
+    takeaway:  [32, 6],
+    cta:       [38, 7],
+  };
+
+  const StaticScene = ({ start, duration, peak = 0.9, children }) => {
+    const time = start + duration * peak;
+    const ctx = { time, duration: 45, paused: true, playing: false };
+    return (
+      <window.TimelineContext.Provider value={ctx}>
+        {children}
+      </window.TimelineContext.Provider>
+    );
+  };
+
+  const spotRole = window.ROLES.find(r => r.id === 'priv');
+  const note = window.SPOT_NOTES[spotRole.id];
+
+  const Pages = () => (
+    <>
+      <div className="page">
+        <StaticScene start={TT.title[0]} duration={TT.title[1]}>
+          <Sprite start={TT.title[0]} end={TT.title[0]+TT.title[1]}><window.TitleScene /></Sprite>
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.seven[0]} duration={TT.seven[1]}>
+          <Sprite start={TT.seven[0]} end={TT.seven[0]+TT.seven[1]}><window.SevenScene /></Sprite>
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.radar[0]} duration={TT.radar[1]}>
+          <Sprite start={TT.radar[0]} end={TT.radar[0]+TT.radar[1]}><window.RadarScene /></Sprite>
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.notone[0]} duration={TT.notone[1]}>
+          <Sprite start={TT.notone[0]} end={TT.notone[0]+TT.notone[1]}><window.NotOneJobScene /></Sprite>
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.spotlight[0]} duration={TT.spotlight[1]}>
+          <window.RoleSpotlight role={spotRole} note={note}
+            spotStart={TT.spotlight[0]} spotDur={TT.spotlight[1]} idx={1} total={1} />
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.takeaway[0]} duration={TT.takeaway[1]}>
+          <Sprite start={TT.takeaway[0]} end={TT.takeaway[0]+TT.takeaway[1]}><window.TakeawayScene /></Sprite>
+        </StaticScene>
+      </div>
+      <div className="page">
+        <StaticScene start={TT.cta[0]} duration={TT.cta[1]}>
+          <Sprite start={TT.cta[0]} end={TT.cta[0]+TT.cta[1]}><window.CTAScene /></Sprite>
+        </StaticScene>
+      </div>
+    </>
+  );
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<Pages />);
+
+  // Auto-print after fonts load + settle delay
+  (async () => {
+    try { await document.fonts.ready; } catch {}
+    setTimeout(() => window.print(), 800);
+  })();
+</script>
+</body>
+</html>
