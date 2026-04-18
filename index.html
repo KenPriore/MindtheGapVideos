@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindtheGap — Teaser Videos</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #222;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 40px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 80px;
+      border-bottom: 3px solid #d32f2f;
+      padding-bottom: 40px;
+    }
+    h1 {
+      font-size: 48px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      letter-spacing: -1px;
+    }
+    .subtitle {
+      font-size: 18px;
+      color: #666;
+      font-weight: 300;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+      margin-top: 60px;
+    }
+    .teaser-card {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      padding: 32px;
+      text-align: center;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .teaser-card:hover {
+      border-color: #d32f2f;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    .teaser-card h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+    .teaser-card p {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      background: #d32f2f;
+      color: white;
+      padding: 12px 24px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn:hover {
+      background: #b71c1c;
+    }
+    footer {
+      text-align: center;
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 1px solid #e0e0e0;
+      color: #999;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>MindtheGap</h1>
+      <p class="subtitle">Promotional Teaser Videos</p>
+    </header>
+
+    <div class="grid">
+      <a href="teaser-v1/" class="teaser-card">
+        <h2>Teaser v1</h2>
+        <p>Short promotional video introducing MindtheGap</p>
+        <button class="btn">Watch Now</button>
+      </a>
+    </div>
+
+    <footer>
+      <p>MindtheGap — AI Impact Explorer for In-House Legal</p>
+      <p><a href="https://mindthegap.kenpriore.ai" style="color: #d32f2f; text-decoration: none;">Visit Full App →</a></p>
+    </footer>
+  </div>
+</body>
+</html>
