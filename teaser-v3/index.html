@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mind the Gap — Video</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #0a0a0a; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; overflow: hidden; }
+  #root { position: fixed; inset: 0; }
+
+  /* Tweaks panel */
+  #tweaks {
+    position: fixed; right: 20px; bottom: 20px; width: 320px;
+    background: #0a0a0a; color: #fff; border: 1px solid #ff0000;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    padding: 18px; z-index: 10000; display: none;
+    max-height: calc(100vh - 40px); overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  #tweaks.on { display: block; }
+  #tweaks h3 {
+    margin: 0 0 4px 0; font-size: 22px; font-weight: 900;
+    letter-spacing: -0.02em; text-transform: uppercase;
+  }
+  #tweaks .sub { font-size: 10px; font-weight: 900; letter-spacing: 0.3em; text-transform: uppercase; opacity: 0.5; margin-bottom: 14px; }
+  #tweaks .grp { border-top: 1px solid #333; padding-top: 12px; margin-top: 12px; }
+  #tweaks label {
+    display: block; font-size: 10px; font-weight: 900; letter-spacing: 0.25em;
+    text-transform: uppercase; opacity: 0.75; margin-bottom: 6px;
+  }
+  #tweaks .row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+  #tweaks .swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 14px; }
+  #tweaks .sw {
+    aspect-ratio: 1; border: 2px solid transparent; cursor: pointer;
+    transition: transform 0.15s;
+  }
+  #tweaks .sw:hover { transform: scale(1.08); }
+  #tweaks .sw.sel { border-color: #fff; }
+  #tweaks input[type="range"] {
+    width: 100%; -webkit-appearance: none; background: #222; height: 3px; outline: none;
+  }
+  #tweaks input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; background: #ff0000;
+    cursor: pointer; border-radius: 0;
+  }
+  #tweaks .val { font-size: 11px; font-weight: 900; letter-spacing: 0.15em; opacity: 0.6; margin-left: 8px; min-width: 38px; text-align: right; font-family: ui-monospace, monospace; }
+  #tweaks .toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #tweaks .tog {
+    padding: 8px 10px; background: #1a1a1a; border: 1px solid #333; cursor: pointer;
+    font-size: 10px; font-weight: 900; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #888; text-align: left;
+  }
+  #tweaks .tog.on { background: #ff0000; color: #fff; border-color: #ff0000; }
+  #tweaks .close {
+    position: absolute; top: 10px; right: 12px; background: none; border: none;
+    color: #fff; font-size: 18px; cursor: pointer; opacity: 0.5;
+  }
+  #tweaks .close:hover { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<div id="tweaks">
+  <button class="close" onclick="window.__closeTweaks && window.__closeTweaks()">×</button>
+  <h3>Tweaks</h3>
+  <div class="sub">Mind the Gap · Video</div>
+
+  <div class="grp">
+    <label>Accent color</label>
+    <div class="swatches" id="tw-swatches"></div>
+  </div>
+
+  <div class="grp">
+    <label>Pacing
+      <span class="val" id="tw-pace-val"></span>
+    </label>
+    <input type="range" id="tw-pace" min="0.5" max="2" step="0.05" />
+  </div>
+
+  <div class="grp">
+    <label>Background</label>
+    <div class="toggles" id="tw-bg"></div>
+  </div>
+
+  <div class="grp">
+    <label>Loop playback</label>
+    <div class="toggles" id="tw-loop"></div>
+  </div>
+
+  <div class="grp">
+    <label>Jump to scene</label>
+    <div class="toggles" id="tw-jump"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+  // Tweakable defaults — persisted via host
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "accent": "#FF0000",
+    "pace": 1,
+    "bg": "light",
+    "loop": true
+  }/*EDITMODE-END*/;
+  window.__TWEAKS = Object.assign({}, TWEAKS);
+
+  // Register edit-mode handlers FIRST, then announce availability.
+  const panel = document.getElementById('tweaks');
+  const ACCENTS = ['#FF0000', '#FF7A00', '#FFB800', '#00A86B', '#0057B8', '#6A1B9A', '#E91E63', '#111111'];
+  const BGS = [{k:'light',l:'Light'}, {k:'dark',l:'Dark'}, {k:'paper',l:'Paper'}];
+  const SCENES = [
+    {k:0,l:'01 Title'},{k:5,l:'02 Premise'},{k:10,l:'03 Radar'},{k:17,l:'04 7/10'},
+    {k:22,l:'05 12 Roles'},{k:29,l:'06 Spotlights'},
+    {k:59,l:'07 Modes'},{k:66,l:'08 Process'},{k:72,l:'09 Fluency'},
+    {k:78,l:'10 Pipeline'},{k:84,l:'11 Takeaway'},{k:89,l:'12 CTA'},
+  ];
+
+  const renderPanel = () => {
+    // Swatches
+    const sw = document.getElementById('tw-swatches');
+    sw.innerHTML = '';
+    ACCENTS.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'sw' + (c === window.__TWEAKS.accent ? ' sel' : '');
+      el.style.background = c;
+      el.onclick = () => setTweak('accent', c);
+      sw.appendChild(el);
+    });
+    // Pace
+    document.getElementById('tw-pace').value = window.__TWEAKS.pace;
+    document.getElementById('tw-pace-val').textContent = window.__TWEAKS.pace.toFixed(2) + 'x';
+    // Bg
+    const bg = document.getElementById('tw-bg');
+    bg.innerHTML = '';
+    BGS.forEach(b => {
+      const el = document.createElement('button');
+      el.className = 'tog' + (b.k === window.__TWEAKS.bg ? ' on' : '');
+      el.textContent = b.l;
+      el.onclick = () => setTweak('bg', b.k);
+      bg.appendChild(el);
+    });
+    // Loop
+    const lp = document.getElementById('tw-loop');
+    lp.innerHTML = '';
+    [{k:true,l:'Loop on'},{k:false,l:'Play once'}].forEach(o => {
+      const el = document.createElement('button');
+      el.className = 'tog' + (o.k === window.__TWEAKS.loop ? ' on' : '');
+      el.textContent = o.l;
+      el.onclick = () => setTweak('loop', o.k);
+      lp.appendChild(el);
+    });
+    // Jump
+    const jp = document.getElementById('tw-jump');
+    jp.innerHTML = '';
+    SCENES.forEach(s => {
+      const el = document.createElement('button');
+      el.className = 'tog';
+      el.textContent = s.l;
+      el.onclick = () => {
+        if (window.__seekTo) window.__seekTo(s.k);
+      };
+      jp.appendChild(el);
+    });
+  };
+
+  const setTweak = (k, v) => {
+    window.__TWEAKS[k] = v;
+    window.dispatchEvent(new CustomEvent('tweaks-changed'));
+    renderPanel();
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*');
+  };
+
+  window.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type === '__activate_edit_mode') { panel.classList.add('on'); renderPanel(); }
+    if (d.type === '__deactivate_edit_mode') { panel.classList.remove('on'); }
+  });
+  window.__closeTweaks = () => {
+    panel.classList.remove('on');
+    window.parent.postMessage({ type: '__edit_mode_deactivated' }, '*');
+  };
+  // Announce AFTER listener is registered
+  window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+</script>
+
+<script type="text/babel" src="animations.jsx"></script>
+<script type="text/babel" src="scenes.jsx"></script>
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  const BG_COLORS = { light: '#FFFFFF', dark: '#0A0A0A', paper: '#F4F1EB' };
+  const PERSIST_KEY = 'mtg-video';
+
+  const App = () => {
+    const [tw, setTw] = useState({ ...window.__TWEAKS });
+    useEffect(() => {
+      const h = () => setTw({ ...window.__TWEAKS });
+      window.addEventListener('tweaks-changed', h);
+      return () => window.removeEventListener('tweaks-changed', h);
+    }, []);
+
+    // Pace scales total duration (higher pace = shorter run)
+    const scaledTotal = window.TOTAL / tw.pace;
+
+    return (
+      <Stage
+        key={`${tw.bg}-${tw.loop}-${tw.pace.toFixed(2)}`}
+        width={1920}
+        height={1080}
+        duration={scaledTotal}
+        background={BG_COLORS[tw.bg] || '#fff'}
+        loop={tw.loop}
+        autoplay={true}
+        persistKey={PERSIST_KEY}
+      >
+        <ScaledVideo pace={tw.pace} />
+      </Stage>
+    );
+  };
+
+  // Wrap Video in a scaled TimelineContext so scenes configured in original seconds
+  // run correctly regardless of pace (by dividing stage time by pace → original time).
+  const ScaledVideo = ({ pace }) => {
+    const ctx = window.useTimeline();
+    const scaled = React.useMemo(() => ({
+      ...ctx,
+      time: ctx.time * pace,
+      duration: window.TOTAL,
+    }), [ctx.time, ctx.duration, ctx.paused, pace]);
+    return (
+      <window.TimelineContext.Provider value={scaled}>
+        <window.Video />
+      </window.TimelineContext.Provider>
+    );
+  };
+
+  // Jump-to-scene: write directly to Stage's persistKey and reload
+  window.__seekTo = (seconds) => {
+    const pace = window.__TWEAKS.pace || 1;
+    // Stage time is original-time / pace
+    const stageTime = seconds / pace;
+    try { localStorage.setItem(PERSIST_KEY + ':t', String(stageTime)); } catch {}
+    location.reload();
+  };
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
