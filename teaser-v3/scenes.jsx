@@ -94,7 +94,7 @@ const Tick = ({ color = C.black }) => {
     <div className="scene-tick" style={{ position: 'absolute', bottom: 48, left: 120, right: 120,
       fontFamily: FONT, fontSize: 12, fontWeight: 400, letterSpacing: '0.3em', textTransform: 'uppercase', color, opacity: 0.5,
       display: 'flex', justifyContent: 'space-between', borderTop: `1px solid ${color}`, paddingTop: 16 }}>
-      <span>Ken Priore · kenpriore.ai</span>
+      <span>Ken Priore · www.kenpriore.com</span>
       <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>
         {String(time.toFixed(2)).padStart(5, '0')} / {TOTAL.toFixed(2)}
       </span>
