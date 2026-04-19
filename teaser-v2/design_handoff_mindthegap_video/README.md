@@ -2,7 +2,7 @@
 
 ## Overview
 
-An animated video intro (~105s full / ~45s teaser) for the blog post **"Mind the gap: AI capability vs. legal adoption"** and its companion interactive site (mindthegap.kenpriore.com). Designed for social sharing (LinkedIn/Twitter), silent read-along (no narration), and embed/screen-capture export.
+An animated video intro (~105s full / ~45s teaser) for the blog post **"Mind the gap: AI capability vs. legal adoption"** and its companion interactive site (mindthegap.kenpriore.ai). Designed for social sharing (LinkedIn/Twitter), silent read-along (no narration), and embed/screen-capture export.
 
 The narrative arc:
 1. Anthropic's labor market study maps AI exposure across occupations
@@ -10,7 +10,7 @@ The narrative arc:
 3. But "legal" isn't one job — it's 12 distinct in-house roles
 4. Spotlight 5 of those roles, each with a different shape across all 12 job axes
 5. Explore supporting concepts: 7 modes of work, process intelligence, fluency gap, entry-level pipeline collapse
-6. CTA → mindthegap.kenpriore.com
+6. CTA → mindthegap.kenpriore.ai
 
 ## About the Design Files
 
@@ -218,7 +218,7 @@ The timeline uses `T[name] = [start, duration]` seconds on a 105s total.
 - **Background:** white
 - **Chrome label:** "End · 14 / 14"
 - "Visit" eyebrow (14px/900/tracking 0.3em/0.5 opacity)
-- URL: `mindthegap.kenpriore.com` at 68px/900/0.98/-0.03em — "mindthegap" in red, ".kenpriore.com" in black
+- URL: `mindthegap.kenpriore.ai` at 68px/900/0.98/-0.03em — "mindthegap" in red, ".kenpriore.ai" in black
 - Byline below a 1px rule
 
 ## Teaser Variant (45s)

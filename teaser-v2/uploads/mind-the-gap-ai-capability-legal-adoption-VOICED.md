@@ -70,4 +70,4 @@ The shape of the gap is the strategy.
 
 ---
 
-*Ken Priore is Deputy General Counsel at Docusign. He writes about AI governance, legal operations, and the organizational design problems that sit underneath technology adoption. More at [kenpriore.com](http://kenpriore.com).*  
+*Ken Priore is Deputy General Counsel at Docusign. He writes about AI governance, legal operations, and the organizational design problems that sit underneath technology adoption. More at [kenpriore.ai](http://kenpriore.ai).*  

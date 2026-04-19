@@ -94,7 +94,7 @@ const Tick = ({ color = C.black }) => {
     <div className="scene-tick" style={{ position: 'absolute', bottom: 48, left: 120, right: 120,
       fontFamily: FONT, fontSize: 12, fontWeight: 400, letterSpacing: '0.3em', textTransform: 'uppercase', color, opacity: 0.5,
       display: 'flex', justifyContent: 'space-between', borderTop: `1px solid ${color}`, paddingTop: 16 }}>
-      <span>Ken Priore · kenpriore.com</span>
+      <span>Ken Priore · kenpriore.ai</span>
       <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>
         {String(time.toFixed(2)).padStart(5, '0')} / {TOTAL.toFixed(2)}
       </span>
@@ -905,7 +905,7 @@ const CTAScene = () => {
         <div style={{ borderLeft: `1px solid ${C.black}`, paddingLeft: 40, opacity: url }}>
           <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.5, marginBottom: 14 }}>Visit</div>
           <div style={{ fontSize: 68, fontWeight: 900, lineHeight: 0.98, letterSpacing: '-0.03em', marginBottom: 36 }}>
-            <span style={{ color: C.red }}>mindthegap</span>.kenpriore.com
+            <span style={{ color: C.red }}>mindthegap</span>.kenpriore.ai
           </div>
           <div style={{ borderTop: `1px solid ${C.black}`, paddingTop: 18, opacity: byline }}>
             <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.5, marginBottom: 10 }}>Author</div>
