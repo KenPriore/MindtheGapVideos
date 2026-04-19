@@ -13,10 +13,21 @@
   }
   #root { position: fixed; inset: 0; }
 
-  /* Hide Stage's built-in playback bar and drop shadow so it's a pure video */
+  /* Clean up Stage drop shadow so it's a pure video */
   #root > div > div > div[style*="box-shadow"] { box-shadow: none !important; }
-  #root > div > :last-child { display: none !important; }
   #root > div { background: #000 !important; }
+  /* Clean mode hides playback bar for screen recording (toggle with H) */
+  body.clean #root > div > :last-child { display: none !important; }
+
+  /* Tiny hint that flashes when H is pressed */
+  #clean-hint {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    padding: 8px 14px; background: rgba(0,0,0,0.75); color: #fff;
+    font-size: 11px; font-weight: 900; letter-spacing: 0.3em; text-transform: uppercase;
+    z-index: 10001; opacity: 0; transition: opacity 0.25s;
+    pointer-events: none; border: 1px solid #ff0000;
+  }
+  #clean-hint.show { opacity: 1; }
 
   /* Tiny "replay" affordance after playback ends */
   #replay {
@@ -45,6 +56,7 @@
 <body>
 
 <div id="root"></div>
+<div id="clean-hint"></div>
 <div id="fallback">
   <div class="m">Mind<br/>The<br/><span class="g">Gap.</span></div>
 </div>
@@ -69,11 +81,11 @@
   const TEASER_TOTAL = 45;
 
   const TT = {
-    title:     [0,  4],
-    seven:     [4,  5],
-    radar:     [9,  7],
-    notone:    [16, 5],
-    spotlight: [21, 11],
+    title:     [0,  5],
+    seven:     [5,  6],
+    radar:     [11, 7],
+    notone:    [18, 6],
+    spotlight: [24, 8],
     takeaway:  [32, 6],
     cta:       [38, 7],
   };
@@ -138,9 +150,23 @@
   // Replay button + keyboard
   const replay = document.getElementById('replay');
   replay.addEventListener('click', () => window.__restart && window.__restart());
+  // H toggles clean mode (hide playback bar for recording). Space is handled by Stage.
+  const hint = document.getElementById('clean-hint');
+  const flashHint = (msg) => {
+    if (!hint) return;
+    hint.textContent = msg;
+    hint.classList.add('show');
+    clearTimeout(window.__cleanHintT);
+    window.__cleanHintT = setTimeout(() => hint.classList.remove('show'), 1600);
+  };
   window.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;
     if (e.key === 'r' || e.key === 'R') { e.preventDefault(); window.__restart && window.__restart(); }
+    if (e.key === 'h' || e.key === 'H') {
+      e.preventDefault();
+      const on = document.body.classList.toggle('clean');
+      flashHint(on ? 'Clean mode · Space = play/pause · H = toggle' : 'Controls visible');
+    }
   });
 </script>
 </body>
