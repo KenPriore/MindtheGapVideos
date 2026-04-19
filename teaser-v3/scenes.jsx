@@ -78,20 +78,20 @@ const SPOT_NOTES = {
 
 /* ── Shared chrome ──────────────────────────────────────── */
 const Chrome = ({ label, color = C.black }) => (
-  <>
+  <div className="scene-chrome">
     <div style={{ position: 'absolute', top: 48, left: 120, right: 120, display: 'flex', justifyContent: 'space-between',
       fontFamily: FONT, fontSize: 14, fontWeight: 900, letterSpacing: '0.3em', textTransform: 'uppercase', color }}>
       <span>Mind the Gap</span>
       <span style={{ opacity: 0.55 }}>{label}</span>
     </div>
     <div style={{ position: 'absolute', top: 80, left: 120, right: 120, height: 1, background: color, opacity: 0.35 }} />
-  </>
+  </div>
 );
 
 const Tick = ({ color = C.black }) => {
   const { time } = useTimeline();
   return (
-    <div style={{ position: 'absolute', bottom: 48, left: 120, right: 120,
+    <div className="scene-tick" style={{ position: 'absolute', bottom: 48, left: 120, right: 120,
       fontFamily: FONT, fontSize: 12, fontWeight: 400, letterSpacing: '0.3em', textTransform: 'uppercase', color, opacity: 0.5,
       display: 'flex', justifyContent: 'space-between', borderTop: `1px solid ${color}`, paddingTop: 16 }}>
       <span>Ken Priore · kenpriore.com</span>
@@ -226,7 +226,6 @@ const RadarScene = () => {
             opacity: arrow, transform: `translate(-50%, -50%) translateX(${(1-arrow) * 30}px)`,
             display: 'flex', alignItems: 'center', gap: 10, whiteSpace: 'nowrap' }}>
             <span>Legal</span>
-            <span style={{ fontSize: 32 }}>↘</span>
           </div>
         </div>
       </div>
